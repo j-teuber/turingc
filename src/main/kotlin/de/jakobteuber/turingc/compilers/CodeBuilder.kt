@@ -1,6 +1,9 @@
 package de.jakobteuber.turingc.compilers
 
-class CodeBuilder(val comentSign: String) {
+class CodeBuilder(
+    private val commentSign: String,
+    private val indentString: String = " ".repeat(commentSign.length + 1)
+) {
     private val code = StringBuilder()
     private var absoluteIndent = 0
 
@@ -17,7 +20,7 @@ class CodeBuilder(val comentSign: String) {
     fun code(text: String) = text.lines()
         .filter { text.isNotBlank() }
         .forEach { line ->
-            repeat(absoluteIndent) { code.append("    ") }
+            repeat(absoluteIndent) { code.append(indentString) }
             code.append(line.trim()).append('\n')
         }
 
@@ -27,7 +30,7 @@ class CodeBuilder(val comentSign: String) {
 
     fun comment(text: String) {
         emptyLine()
-        code("$comentSign $text")
+        code("$commentSign $text")
     }
 
     inline fun comment(text: String, scope: CodeBuilder.() -> Unit) {

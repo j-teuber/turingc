@@ -39,16 +39,15 @@ class TollToNsdCompiler : TollBaseVisitor<Unit>() {
             val l1 = tempLabelName()
             val l2 = tempLabelName()
 
-            comment("counting $varName down to zero executing $action") {
+            comment("repeat ($varName)") {
                 code("LABEL $l1;")
                 code("IFNULL $varName GOTO $l2;")
-                indent()
 
                 if (reusable) code("INC $temp;")
                 code("DEC $varName;")
-                action()
-
-                dedent()
+                comment("repeat action:") {
+                    action()
+                }
                 code("IFNULL $constNull GOTO $l1;")
                 code("LABEL $l2;")
 
@@ -68,7 +67,7 @@ class TollToNsdCompiler : TollBaseVisitor<Unit>() {
         comment("variable assignment: $to := $from") {
             whileNotNull(
                 to,
-                { comment("do nothing inside the loop, just cout down to zero") },
+                { comment("do nothing inside the loop, just cout $to down to zero") },
                 reusable = false
             )
             whileNotNull(from, "INC $to;", reusable = true)
