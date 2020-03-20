@@ -1,0 +1,11 @@
+.parenthesis {
+    -fx-font-shape: italic;
+}
+.direction {
+    -fx-text-color: green;
+}
+.halt {
+    -fx-text-color: red;
+    -fx-font-shape: italic;
+    -fx-font-weight: bold;
+}
