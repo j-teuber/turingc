@@ -42,11 +42,11 @@ class CodeBuilder(
     }
 
     fun description(text: String) {
-        val descriptionWidth = text.length + 4
-        code.append("//")
+        val descriptionWidth = text.length + commentSign.length + 4
+        code.append(commentSign)
         repeat(descriptionWidth) { code.append("*") }
-        code.append("//").append("* ").append(text).append(" *")
-        code.append("//")
+        code.append(commentSign).append("* ").append(text).append(" *")
+        code.append(commentSign)
         repeat(descriptionWidth) { code.append("*") }
     }
 }
