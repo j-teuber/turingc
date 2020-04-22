@@ -18,18 +18,18 @@ class NsdToTuringCompiler(private val labels: Map<String, Int>) : NsdBaseListene
 
     private fun registerVar(varName: String, token: Token) {
         if (variables.containsKey(varName)) {
-            throw NsdException(token, "variable already exists")
+            throw CompilerException(token, "variable already exists")
         } else {
             variables[varName] = variables.size
         }
     }
 
     private fun getVarIndex(varName: String, token: Token): Int {
-        return variables[varName] ?: throw NsdException(token, "variable not defined")
+        return variables[varName] ?: throw CompilerException(token, "variable not defined")
     }
 
     private fun getLabelIndex(label: String, token: Token): Int {
-        return labels[label] ?: throw NsdException(token, "label is undefined")
+        return labels[label] ?: throw CompilerException(token, "label is undefined")
     }
 
     private fun addCode(string: String) {
@@ -249,7 +249,7 @@ private class LabelVisitor : NsdBaseListener() {
 
     private fun registerVar(varName: String, token: Token) {
         if (variables.containsKey(varName)) {
-            throw NsdException(token, "variable already exists")
+            throw CompilerException(token, "variable already exists")
         } else {
             variables[varName] = currentState
         }
@@ -257,13 +257,13 @@ private class LabelVisitor : NsdBaseListener() {
 
     private fun registerLabel(label: String, token: Token) {
         if (labels.containsKey(label)) {
-            throw NsdException(token, "label is already defined")
+            throw CompilerException(token, "label is already defined")
         }
         labels[label] = currentState
     }
 
     private fun getVarIndex(varName: String, token: Token): Int {
-        return (variables[varName] ?: throw NsdException(token, "variable not defined")) + 2
+        return (variables[varName] ?: throw CompilerException(token, "variable not defined")) + 2
     }
 
     override fun enterLabel(ctx: NsdParser.LabelContext) {

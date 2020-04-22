@@ -12,7 +12,7 @@ class NsdToTollCompiler : NsdBaseListener() {
     private val labels = mutableMapOf("#DEFAULT" to 0)
 
     private fun registerLabel(label: String, token: Token): Int {
-        if (labels.containsKey(label)) throw NsdException(token, "label is already defined")
+        if (labels.containsKey(label)) throw CompilerException(token, "label is already defined")
         val labelIndex = labels.size
         labels[label] = labelIndex
         return labelIndex
@@ -27,7 +27,7 @@ class NsdToTollCompiler : NsdBaseListener() {
     }
 
     private fun getLabelIndex(label: String, token: Token): Int {
-        return labels[label] ?: throw NsdException(token, "label is undefined")
+        return labels[label] ?: throw CompilerException(token, "label is undefined")
     }
 
     override fun enterParameterHeader(ctx: NsdParser.ParameterHeaderContext) =
