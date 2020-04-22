@@ -30,8 +30,10 @@ class NsdToTollCompiler : NsdBaseListener() {
         return labels[label] ?: throw NsdException(token, "label is undefined")
     }
 
-    override fun enterProgramm(ctx: NsdParser.ProgrammContext?) =
+    override fun enterParameterHeader(ctx: NsdParser.ParameterHeaderContext) =
         codeBuilder.add {
+            code(ctx.humanizedText)
+            emptyLine()
             code("var label = 0;")
             code("var halt = 0;")
             code("var erg = 0;")

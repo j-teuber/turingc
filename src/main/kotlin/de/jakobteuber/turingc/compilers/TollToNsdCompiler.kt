@@ -100,6 +100,11 @@ class TollToNsdCompiler : TollBaseVisitor<Unit>() {
             codeBuilder.action(leftResult, rightResult, result)
         }
 
+    override fun visitParameterHeader(ctx: TollParser.ParameterHeaderContext) =
+        codeBuilder.add {
+            code(ctx.humanizedText)
+        }
+
     override fun visitNumber(ctx: TollParser.NumberContext) =
         assignment(currentResultVarName, Integer.parseInt(ctx.number.text))
 
@@ -373,7 +378,7 @@ class TollToNsdCompiler : TollBaseVisitor<Unit>() {
             val parser = TollParser(tokens)
 
             val visitor = TollToNsdCompiler()
-            visitor.visit(parser.instrList())
+            visitor.visit(parser.program())
             return visitor.codeBuilder.resultingCode()
         }
     }

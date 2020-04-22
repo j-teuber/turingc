@@ -1,6 +1,8 @@
 grammar Nsd;
 
-programm: (instruction DELIMITER)+ ;
+programm: parameterHeader (instruction DELIMITER)+ ;
+
+parameterHeader: 'params' params=IDENTIFIER* ':';
 
 instruction: 'INIT' varName=IDENTIFIER #Init
          | 'INC' varName=IDENTIFIER #Increment

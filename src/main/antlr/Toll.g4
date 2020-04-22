@@ -1,9 +1,13 @@
 grammar Toll;
 
+program: parameterHeader instrList;
+
+parameterHeader: 'param' params=IDENTIFIEER* ':';
+
 instrList: instr=instruction+ ;
 
-instruction: 'var' name=ID '=' expr=numExpression ';' #VarInit
-           | name=ID '=' expr=numExpression ';' #VarModification
+instruction: 'var' name=IDENTIFIEER '=' expr=numExpression ';' #VarInit
+           | name=IDENTIFIEER '=' expr=numExpression ';' #VarModification
            | 'while''(' condition=boolExpression ')''{' content=instrList '}' #While
            | 'if''(' condition=boolExpression ')''{' ifContent=instrList '}' #If
            | 'if''(' condition=boolExpression ')''{' ifContent=instrList '}''else''{' elseContent=instrList '}' #IfElse
@@ -17,7 +21,7 @@ numExpression: '(' content=numExpression')' #NumParanthesis
              | left=numExpression '-' right=numExpression #Sub
              | left=numExpression '+' right=numExpression #Add
              | number=NUMBER #Number
-             | name=ID #VarUse
+             | name=IDENTIFIEER #VarUse
              ;
 
 boolExpression: '(' content=boolExpression ')' #BoolParanthesis
@@ -31,7 +35,7 @@ boolExpression: '(' content=boolExpression ')' #BoolParanthesis
 
 whenContent: value=numExpression '->''{'content=instrList'}';
 
-ID: [A-Za-z]([A-Za-z0-9]+)? ;
+IDENTIFIEER: [A-Za-z]([A-Za-z0-9]+)? ;
 NUMBER: [0-9]+ ;
 BOOLEAN: 'true' | 'false' ;
 WHITESPACE: [ \t\n\r] -> skip;
