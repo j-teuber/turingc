@@ -17,7 +17,7 @@ data class Input(val arguments: List<Argument>) {
 }
 
 data class Output(val returnValue: Argument) {
-    val tollOutput = returnValue.toTollArgument()
-    val nsdOutput = returnValue.toNsdArgument()
-    val turingOutput = returnValue.toTuringArgument()
+    val tollOutput get() = returnValue.toTollArgument()
+    val nsdOutput get() = returnValue.toNsdArgument()
+    val turingOutput get() = returnValue.toTuringArgument()
 }
