@@ -35,7 +35,7 @@ boolExpression: '(' content=boolExpression ')' #BoolParanthesis
 
 whenContent: value=numExpression '->''{'content=instrList'}';
 
-IDENTIFIEER: [A-Za-z]([A-Za-z0-9]+)? ;
+IDENTIFIEER: ([a-z] | [A-Z]) ([a-z] | [A-Z] | [0-9] | '$' | '-' | '_')* ;
 NUMBER: [0-9]+ ;
 BOOLEAN: 'true' | 'false' ;
 WHITESPACE: [ \t\n\r] -> skip;

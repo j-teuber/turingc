@@ -13,6 +13,6 @@ instruction: 'INIT' varName=IDENTIFIER #Init
          ;
 
 DELIMITER: ';';
-IDENTIFIER: [a-z][a-zA-Z0-9\-]*;
+IDENTIFIER: ([a-z] | [A-Z]) ([a-z] | [A-Z] | [0-9] | '$' | '-' | '_')*;
 WHITESPACE: [ \t\n\r] -> skip;
 COMMENT: '#' .+? [\n\r]+ -> skip;
