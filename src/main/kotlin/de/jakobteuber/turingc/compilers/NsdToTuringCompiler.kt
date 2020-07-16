@@ -227,7 +227,6 @@ class NsdToTuringCompiler(private val labels: Map<String, Int>) : NsdBaseListene
     }
 
     companion object {
-
         fun compile(code: String) = compile(CharStreams.fromString(code))
         fun compile(file: Path) = compile(CharStreams.fromPath(file))
         private fun compile(input: CharStream): String {
@@ -296,9 +295,9 @@ private class LabelVisitor : NsdBaseListener() {
             val lexer = NsdLexer(input)
             val tokens = CommonTokenStream(lexer)
             val parser = NsdParser(tokens)
-            val compiler = LabelVisitor()
-            ParseTreeWalker.DEFAULT.walk(compiler, parser.programm())
-            return compiler.labels
+            val labelVisitor = LabelVisitor()
+            ParseTreeWalker.DEFAULT.walk(labelVisitor, parser.programm())
+            return labelVisitor.labels
         }
     }
 }
