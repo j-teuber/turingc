@@ -2,7 +2,11 @@ grammar Toll;
 
 program: parameterHeader instrList;
 
-parameterHeader: 'param' params=IDENTIFIEER* ':';
+parameterHeader: 'program' name=IDENTIFIEER '(' parameters ')' ':';
+
+parameters: (parameter ',')*;
+
+parameter: name=IDENTIFIEER;
 
 instrList: instr=instruction+ ;
 

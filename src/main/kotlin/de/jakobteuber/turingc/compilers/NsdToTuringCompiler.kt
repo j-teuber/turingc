@@ -96,8 +96,9 @@ class NsdToTuringCompiler(private val labels: Map<String, Int>) : NsdBaseListene
         moveToVar(varName, token)
     }
 
-    override fun enterParameterHeader(ctx: NsdParser.ParameterHeaderContext) =
-        ctx.IDENTIFIER().forEach { registerVar(it.text, it.symbol) }
+    override fun enterParameter(ctx: NsdParser.ParameterContext) {
+        registerVar(ctx.name.text, ctx.name)
+    }
 
     override fun enterIncrement(ctx: NsdParser.IncrementContext) {
         addDigit(ctx.varName.text, ctx.varName)

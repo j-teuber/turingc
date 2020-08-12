@@ -28,7 +28,14 @@ dependencies {
     compile("no.tornado", "tornadofx", "1.7.19")
     compile("org.fxmisc.richtext", "richtextfx", "0.10.3")
 
-    // antlr & JiteScript
+    // Kotlin Script runtime
+    // See also resources/META-INF/services/javax.script.ScriptEngineFactory
+    compile("org.jetbrains.kotlin", "kotlin-script-runtime", "1.3.60")
+    compile("org.jetbrains.kotlin", "kotlin-script-util", "1.3.60")
+    compile("org.jetbrains.kotlin", "kotlin-compiler-embeddable", "1.3.60")
+    runtime("org.jetbrains.kotlin", "kotlin-scripting-compiler-embeddable", "1.3.60")
+
+    // antlr, JiteScript
     antlr("org.antlr", "antlr4", "4.7.1")
     compile("org.antlr", "antlr4-runtime", "4.7.1")
     compile("ca.mcgill.sable", "jasmin", "3.0.1")
