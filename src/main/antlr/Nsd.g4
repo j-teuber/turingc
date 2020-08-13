@@ -4,7 +4,7 @@ programm: parameterHeader (instruction DELIMITER)+ EOF;
 
 parameterHeader: 'program' name=IDENTIFIER '(' parameters ')' ':';
 
-parameters: (parameter ',')*;
+parameters: (parameter ','?)*;
 
 parameter: name=IDENTIFIER;
 

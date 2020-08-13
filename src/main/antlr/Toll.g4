@@ -4,7 +4,7 @@ program: parameterHeader instrList EOF;
 
 parameterHeader: 'program' name=IDENTIFIEER '(' parameters ')' ':';
 
-parameters: (parameter ',')*;
+parameters: (parameter ','?)*;
 
 parameter: name=IDENTIFIEER;
 
