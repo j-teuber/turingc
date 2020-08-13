@@ -1,6 +1,6 @@
 grammar Turing;
 
-programm: state+ ;
+programm: state+ EOF;
 
 state: '(' statements=statement+ ')';
 

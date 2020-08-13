@@ -1,6 +1,6 @@
 grammar Nsd;
 
-programm: parameterHeader (instruction DELIMITER)+ ;
+programm: parameterHeader (instruction DELIMITER)+ EOF;
 
 parameterHeader: 'program' name=IDENTIFIER '(' parameters ')' ':';
 

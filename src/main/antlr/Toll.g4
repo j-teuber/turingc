@@ -1,6 +1,6 @@
 grammar Toll;
 
-program: parameterHeader instrList;
+program: parameterHeader instrList EOF;
 
 parameterHeader: 'program' name=IDENTIFIEER '(' parameters ')' ':';
 
