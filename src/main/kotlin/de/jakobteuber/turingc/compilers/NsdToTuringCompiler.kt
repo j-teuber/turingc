@@ -12,7 +12,7 @@ import java.nio.file.Path
 
 
 class NsdToTuringCompiler(private val labels: Map<String, Int>) : NsdBaseListener() {
-    private val code = CodeBuilder(commentSign = "# ")
+    private val code = CodeBuilder(commentSign = "#")
     private var currentState = 0
     private val variables = mutableMapOf<String, Int>()
 
@@ -334,15 +334,23 @@ class NsdToTuringCompiler(private val labels: Map<String, Int>) : NsdBaseListene
         }
 
     companion object {
-        fun compile(code: String) = compile(CharStreams.fromString(code))
-        fun compile(file: Path) = compile(CharStreams.fromPath(file))
-        private fun compile(input: CharStream): String {
+        fun compile(code: String) = compile(
+            CharStreams.fromString(code),
+            LabelVisitor.computeLabelTable(CharStreams.fromString(code))
+        )
+
+        fun compile(file: Path) = compile(
+            CharStreams.fromPath(file),
+            LabelVisitor.computeLabelTable(CharStreams.fromPath(file))
+        )
+
+        private fun compile(input: CharStream, labelTable: Map<String, Int>): String {
             val lexer = NsdLexer(input)
             val tokens = CommonTokenStream(lexer)
             val parser = NsdParser(tokens)
-            val compiler = NsdToTuringCompiler(LabelVisitor.computeLabelTable(input))
+            val compiler = NsdToTuringCompiler(labelTable)
             ParseTreeWalker.DEFAULT.walk(compiler, parser.programm())
-            return compiler.code.toString()
+            return compiler.code.resultingCode()
         }
 
     }
@@ -370,6 +378,10 @@ private class LabelVisitor : NsdBaseListener() {
 
     private fun getVarIndex(varName: String, token: Token): Int {
         return (variables[varName] ?: throw CompilerException(token, "variable not defined")) + 2
+    }
+
+    override fun enterParameter(ctx: NsdParser.ParameterContext) {
+        registerVar(ctx.name.text, ctx.name)
     }
 
     override fun enterLabel(ctx: NsdParser.LabelContext) {
