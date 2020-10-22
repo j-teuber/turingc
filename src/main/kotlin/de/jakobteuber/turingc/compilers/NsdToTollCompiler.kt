@@ -3,35 +3,26 @@ package de.jakobteuber.turingc.compilers
 import NsdBaseListener
 import NsdLexer
 import NsdParser
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.tree.ParseTreeWalker
 import java.nio.file.Path
 
 
-class NsdToTollCompiler : NsdBaseListener() {
-    private val codeBuilder = CodeBuilder("//")
-    private val labels = mutableMapOf("#DEFAULT" to 0)
+class NsdToTollCompiler(private val labelTable: Map<String, Int>) : NsdBaseListener() {
+    private val code = CodeBuilder(commentSign = "//")
+    private var tempLabelIndex = labelTable.size
 
-    private fun registerLabel(label: String, token: Token): Int {
-        if (labels.containsKey(label)) throw CompilerException(token, "label is already defined")
-        val labelIndex = labels.size
-        labels[label] = labelIndex
-        return labelIndex
-    }
-
-    private fun registerTempLabel(): Int {
-        var labelId = labels.size
-        while ("else-$labelId" in labels) labelId++
-        val labelIndex = labels.size
-        labels["else-$labelId"] = labelIndex
-        return labelIndex
-    }
+    private fun registerTempLabel(): Int = tempLabelIndex++
 
     private fun getLabelIndex(label: String, token: Token): Int {
-        return labels[label] ?: throw CompilerException(token, "label is undefined")
+        return labelTable[label] ?: throw CompilerException(token, "label is undefined")
     }
 
     override fun enterParameterHeader(ctx: NsdParser.ParameterHeaderContext) =
-        codeBuilder.add {
+        code.add {
             code(ctx.humanizedText)
             emptyLine()
             code("var label = 0;")
@@ -43,20 +34,21 @@ class NsdToTollCompiler : NsdBaseListener() {
             code("when (label) {")
             indent()
             code("0 -> {")
+            indent()
         }
 
     override fun enterInit(ctx: NsdParser.InitContext) =
-        codeBuilder.code("var ${ctx.varName} = 0;")
+        code.code("var ${ctx.varName.text} = 0;")
 
     override fun enterIncrement(ctx: NsdParser.IncrementContext) =
-        codeBuilder.code("${ctx.varName}++;")
+        code.code("${ctx.varName.text}++;")
 
     override fun enterDecrement(ctx: NsdParser.DecrementContext) =
-        codeBuilder.code("${ctx.varName}--;")
+        code.code("${ctx.varName.text}--;")
 
     override fun enterLabel(ctx: NsdParser.LabelContext) =
-        codeBuilder.add {
-            val labelIndex = registerLabel(ctx.label.text, ctx.label)
+        code.add {
+            val labelIndex = getLabelIndex(ctx.label.text, ctx.label)
 
             code("label = $labelIndex;")
             dedent()
@@ -66,11 +58,11 @@ class NsdToTollCompiler : NsdBaseListener() {
         }
 
     override fun enterGoto(ctx: NsdParser.GotoContext) =
-        codeBuilder.add {
+        code.add {
             val labelIndex = getLabelIndex(ctx.label.text, ctx.label)
             val elseIndex = registerTempLabel()
 
-            code("if (${ctx.varName} == 0) {")
+            code("if (${ctx.varName.text} == 0) {")
             indent()
             code("label = $labelIndex;")
             dedent()
@@ -87,25 +79,56 @@ class NsdToTollCompiler : NsdBaseListener() {
 
 
     override fun exitProgramm(ctx: NsdParser.ProgrammContext?) =
-        codeBuilder.add {
+        code.add {
+            code("}")
+            dedent()
             code("};")
             dedent()
             code("};")
+            dedent()
             code("return erg;")
         }
 
     companion object {
-        fun compile(code: String) = compile(CharStreams.fromString(code))
-        fun compile(file: Path) = compile(CharStreams.fromPath(file))
+        fun compile(code: String) = compile(
+            CharStreams.fromString(code),
+            LabelVisitor.computeLabelTable(CharStreams.fromString(code))
+        )
 
-        private fun compile(code: CharStream): String {
-            val lexer = NsdLexer(code)
-            val tokens: TokenStream = CommonTokenStream(lexer)
+        fun compile(file: Path) = compile(
+            CharStreams.fromPath(file),
+            LabelVisitor.computeLabelTable(CharStreams.fromPath(file))
+        )
+
+        private fun compile(input: CharStream, labelTable: Map<String, Int>): String {
+            val lexer = NsdLexer(input)
+            val tokens = CommonTokenStream(lexer)
             val parser = NsdParser(tokens)
+            val compiler = NsdToTollCompiler(labelTable)
+            ParseTreeWalker.DEFAULT.walk(compiler, parser.programm())
+            return compiler.code.resultingCode()
+        }
 
-            val listener = NsdToTollCompiler()
-            parser.programm().enterRule(listener)
-            return listener.codeBuilder.resultingCode()
+    }
+
+    private class LabelVisitor : NsdBaseListener() {
+        val labels = mutableMapOf("" to 0)
+
+        override fun enterLabel(ctx: NsdParser.LabelContext) {
+            val label = ctx.label.text
+            if (labels.containsKey(label)) throw CompilerException(ctx.label, "label is already defined")
+            labels[label] = labels.size
+        }
+
+        companion object {
+            fun computeLabelTable(input: CharStream): Map<String, Int> {
+                val lexer = NsdLexer(input)
+                val tokens = CommonTokenStream(lexer)
+                val parser = NsdParser(tokens)
+                val labelVisitor = LabelVisitor()
+                ParseTreeWalker.DEFAULT.walk(labelVisitor, parser.programm())
+                return labelVisitor.labels
+            }
         }
     }
 }

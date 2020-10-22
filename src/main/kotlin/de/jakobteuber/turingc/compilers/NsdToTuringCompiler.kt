@@ -354,69 +354,69 @@ class NsdToTuringCompiler(private val labels: Map<String, Int>) : NsdBaseListene
         }
 
     }
-}
 
-private class LabelVisitor : NsdBaseListener() {
-    private var currentState = 0
-    private val labels = mutableMapOf<String, Int>()
-    private val variables = mutableMapOf<String, Int>()
+    private class LabelVisitor : NsdBaseListener() {
+        private var currentState = 0
+        private val labels = mutableMapOf<String, Int>()
+        private val variables = mutableMapOf<String, Int>()
 
-    private fun registerVar(varName: String, token: Token) {
-        if (variables.containsKey(varName)) {
-            throw CompilerException(token, "variable already exists")
-        } else {
-            variables[varName] = currentState
+        private fun registerVar(varName: String, token: Token) {
+            if (variables.containsKey(varName)) {
+                throw CompilerException(token, "variable already exists")
+            } else {
+                variables[varName] = currentState
+            }
         }
-    }
 
-    private fun registerLabel(label: String, token: Token) {
-        if (labels.containsKey(label)) {
-            throw CompilerException(token, "label is already defined")
+        private fun registerLabel(label: String, token: Token) {
+            if (labels.containsKey(label)) {
+                throw CompilerException(token, "label is already defined")
+            }
+            labels[label] = currentState
         }
-        labels[label] = currentState
-    }
 
-    private fun getVarIndex(varName: String, token: Token): Int {
-        return (variables[varName] ?: throw CompilerException(token, "variable not defined")) + 2
-    }
+        private fun getVarIndex(varName: String, token: Token): Int {
+            return (variables[varName] ?: throw CompilerException(token, "variable not defined")) + 2
+        }
 
-    override fun enterParameter(ctx: NsdParser.ParameterContext) {
-        registerVar(ctx.name.text, ctx.name)
-    }
+        override fun enterParameter(ctx: NsdParser.ParameterContext) {
+            registerVar(ctx.name.text, ctx.name)
+        }
 
-    override fun enterLabel(ctx: NsdParser.LabelContext) {
-        registerLabel(ctx.label.text, ctx.label)
-    }
+        override fun enterLabel(ctx: NsdParser.LabelContext) {
+            registerLabel(ctx.label.text, ctx.label)
+        }
 
-    override fun enterIncrement(ctx: NsdParser.IncrementContext) {
-        currentState += 6 + getVarIndex(ctx.varName.text, ctx.varName)
-    }
+        override fun enterIncrement(ctx: NsdParser.IncrementContext) {
+            currentState += 6 + getVarIndex(ctx.varName.text, ctx.varName)
+        }
 
-    override fun enterDecrement(ctx: NsdParser.DecrementContext) {
-        currentState += 1 + getVarIndex(ctx.varName.text, ctx.varName)
-    }
+        override fun enterDecrement(ctx: NsdParser.DecrementContext) {
+            currentState += 1 + getVarIndex(ctx.varName.text, ctx.varName)
+        }
 
-    override fun enterInit(ctx: NsdParser.InitContext) {
-        currentState += 4
-        registerVar(ctx.varName.text, ctx.varName)
-    }
+        override fun enterInit(ctx: NsdParser.InitContext) {
+            currentState += 4
+            registerVar(ctx.varName.text, ctx.varName)
+        }
 
-    override fun enterGoto(ctx: NsdParser.GotoContext) {
-        currentState += 2 + getVarIndex(ctx.varName.text, ctx.varName)
-    }
+        override fun enterGoto(ctx: NsdParser.GotoContext) {
+            currentState += 2 + getVarIndex(ctx.varName.text, ctx.varName)
+        }
 
-    override fun enterReturn(ctx: NsdParser.ReturnContext) {
-        currentState += 13 + getVarIndex(ctx.varName.text, ctx.varName)
-    }
+        override fun enterReturn(ctx: NsdParser.ReturnContext) {
+            currentState += 13 + getVarIndex(ctx.varName.text, ctx.varName)
+        }
 
-    companion object {
-        fun computeLabelTable(input: CharStream): Map<String, Int> {
-            val lexer = NsdLexer(input)
-            val tokens = CommonTokenStream(lexer)
-            val parser = NsdParser(tokens)
-            val labelVisitor = LabelVisitor()
-            ParseTreeWalker.DEFAULT.walk(labelVisitor, parser.programm())
-            return labelVisitor.labels
+        companion object {
+            fun computeLabelTable(input: CharStream): Map<String, Int> {
+                val lexer = NsdLexer(input)
+                val tokens = CommonTokenStream(lexer)
+                val parser = NsdParser(tokens)
+                val labelVisitor = LabelVisitor()
+                ParseTreeWalker.DEFAULT.walk(labelVisitor, parser.programm())
+                return labelVisitor.labels
+            }
         }
     }
 }
